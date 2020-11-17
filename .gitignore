@@ -3,6 +3,7 @@
 projectenv/
 venv/
 src/.idea/
+.idea/
 quickstart/
 snippets/
 *.iml
