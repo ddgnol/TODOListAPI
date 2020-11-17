@@ -10,7 +10,6 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = '__all__'
 
-
 class UserSerializer(serializers.ModelSerializer):
     task = serializers.PrimaryKeyRelatedField(many=True, queryset=Task.objects.all())
 
