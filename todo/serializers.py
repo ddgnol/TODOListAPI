@@ -9,20 +9,7 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = '__all__'
-    def create(self, validated_data):
-        """
-        Create and return a new `Snippet` instance, given the validated data.
-        """
-        return Task.objects.create(**validated_data)
 
-    def update(self, instance, validated_data):
-        """
-        Update and return an existing `Snippet` instance, given the validated data.
-        """
-        instance.title = validated_data.get('title', instance.title)
-        instance.completed = validated_data.get('completed', instance.completed)
-        instance.save()
-        return instance
 
 class UserSerializer(serializers.ModelSerializer):
     task = serializers.PrimaryKeyRelatedField(many=True, queryset=Task.objects.all())
@@ -30,3 +17,17 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'task']
+
+# Register serializer
+class RegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'password')
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def create(self, validated_data):
+        user = User.objects.create_user(validated_data['username'], password=validated_data['password'],)
+        return user
+
