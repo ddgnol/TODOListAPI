@@ -1,4 +1,5 @@
 import jwt
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 from rest_framework import generics, status, exceptions
@@ -9,7 +10,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
-
+from django.http import Http404
 from CustomUser import settings
 from users.serializers import LoginSerializer, UserSerializer, RegisterSerializer, ChangePasswordSerializer
 from users.utils import generate_access_token
@@ -69,14 +70,34 @@ def refresh_token_view(request):
     return Response({'access_token': access_token})
 
 
-class UserView(generics.RetrieveUpdateAPIView):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = UserSerializer
+# class UserView(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
+#     serializer_class = UserSerializer
+#
+#     def get(self, request, pk, format=None):
+#         print(self.request.user)
+#         user = request.user
+#         serializer = self.serializer_class(user)
+#         return Response(serializer.data)
 
-    def get_queryset(self):
-        user = self.request.user
-        # print(user)
-        return User.objects.filter(username=user)
+
+# class UserView(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
+#     serializer_class = UserSerializer
+#
+#     def get_queryset(self):
+#         user = self.request.user
+#         print(user)
+#         return User.objects.filter(username=user)
+#
+#     def patch(self, request, pk):
+#         user = request.user
+#         serializer = UserSerializer(user, data=request.data,
+#                                          partial=True)  # set partial=True to update a data partially
+#         if serializer.is_valid():
+#             serializer.save()
+#             return JsonResponse(code=201, data=serializer.data)
+#         return JsonResponse(code=400, data="wrong parameters")
 
 
 class ChangePasswordView(UpdateAPIView):
@@ -85,7 +106,7 @@ class ChangePasswordView(UpdateAPIView):
     """
     serializer_class = ChangePasswordSerializer
     model = User
-    permission_classes = [permissions.IsAuthenticated,]
+    permission_classes = [permissions.IsAuthenticated, ]
 
     def get_object(self, queryset=None):
         obj = self.request.user
@@ -111,4 +132,26 @@ class ChangePasswordView(UpdateAPIView):
 
             return Response(response)
 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PATCH'])
+@permission_classes([permissions.IsAuthenticated])
+def profile(request):
+    try:
+        user = request.user
+        print(user)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        print(user.id)
+        # if not user:
+        #     return Response({'detail': 'unknownS error'})
+        serialized_user = UserSerializer(user).data
+        return Response({'user': serialized_user})
+    elif request.method == 'PATCH':
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

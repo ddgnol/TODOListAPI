@@ -1,7 +1,8 @@
+from django.conf.urls import url
 from django.urls import path
 from todo.views import ListTodo, DetailTodo
 
 urlpatterns = [
-    path('', ListTodo.as_view()),
-    path('<int:pk>/', DetailTodo.as_view()),
+    url(r'^list/?$', ListTodo.as_view()),
+    url(r'(?P<pk>[0-9]+)/?$', DetailTodo.as_view()),
 ]

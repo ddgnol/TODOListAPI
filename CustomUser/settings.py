@@ -23,9 +23,9 @@ SECRET_KEY = 'rf3gpc+-2&v6_6ce%(2b+l#ne-+f2r@ktt#sns+c^*(1wmz+bq'
 
 REFRESH_TOKEN_SECRET = 'abcdefghijklmnopqrstuvxyz'
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -137,3 +137,8 @@ REST_FRAMEWORK = {
     #     'rest_framework.permissions.IsAuthenticated',
     # )
 }
+#
+# REST_FRAMEWORK = {
+#     'EXCEPTION_HANDLER': 'CustomUser.users.utils.custom_exception_handler'
+# }
+# APPEND_SLASH = True

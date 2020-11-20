@@ -47,7 +47,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(max_length=15)
 
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email', 'full_name', 'phone']
+    REQUIRED_FIELDS = ['email']
 
     objects = UserManager()
 

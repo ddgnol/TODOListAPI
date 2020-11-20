@@ -81,17 +81,18 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email',
                   'full_name', 'phone','task']
-        read_only_fields = ('email', 'username')
+        read_only_fields = ('email', 'username', 'task')
 
     def update(self, instance, validated_data):
         instance.full_name = validated_data.get('full_name', instance.full_name)
-        phone = validated_data.get('phone')
-        # print(phone)
-        regex = r'^\+?\d{9,12}$'
-        x = re.search(regex, phone)
-        if not x:
-            raise serializers.ValidationError({'phone': 'Enter a valid phone number'})
-        instance.phone = phone
+        if validated_data.get('phone'):
+            phone = validated_data.get('phone')
+            # print(phone)
+            regex = r'^\+?\d{9,12}$'
+            x = re.search(regex, phone)
+            if not x:
+                raise serializers.ValidationError({'phone': 'Enter a valid phone number'})
+            instance.phone = phone
         instance.save()
         return instance
 
