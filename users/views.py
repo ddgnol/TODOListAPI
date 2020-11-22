@@ -1,6 +1,7 @@
 import jwt
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from rest_framework import generics, status, exceptions
 from rest_framework.decorators import api_view, permission_classes
@@ -15,6 +16,7 @@ from CustomUser import settings
 from users.serializers import LoginSerializer, UserSerializer, RegisterSerializer, ChangePasswordSerializer
 from users.utils import generate_access_token
 from users.models import User
+from jsonview.decorators import json_view
 
 
 class RegisterView(generics.GenericAPIView):
@@ -38,7 +40,7 @@ class LoginAPIView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+@json_view
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def refresh_token_view(request):
@@ -55,7 +57,7 @@ def refresh_token_view(request):
             'expired refresh token, please login again.')
     except:
         return Response(
-            {"detail": "bad refresh token."},
+            {"detail": "Unknown error"},
             status=status.HTTP_400_BAD_REQUEST
         )
 
@@ -69,6 +71,55 @@ def refresh_token_view(request):
     access_token = generate_access_token(user)
     return Response({'access_token': access_token})
 
+
+class ChangePasswordView(UpdateAPIView):
+    """
+    An endpoint for changing password.
+    """
+    serializer_class = ChangePasswordSerializer
+    model = User
+    permission_classes = [permissions.IsAuthenticated, ]
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            # Check old password
+            if not self.object.check_password(serializer.data.get("old_password")):
+                return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+            # set_password also hashes the password that the user will get
+            self.object.set_password(serializer.data.get("new_password"))
+            self.object.save()
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'message': 'Password updated successfully',
+                # 'data': []
+            }
+
+            return Response(response)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@json_view
+@api_view(['GET', 'PATCH'])
+@permission_classes([permissions.IsAuthenticated])
+def profile(request):
+    user = request.user
+    if request.method == 'GET':
+        serialized_user = UserSerializer(user).data
+        return Response({'user': serialized_user})
+    elif request.method == 'PATCH':
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # class UserView(APIView):
 #     permission_classes = [permissions.IsAuthenticated]
@@ -98,60 +149,3 @@ def refresh_token_view(request):
 #             serializer.save()
 #             return JsonResponse(code=201, data=serializer.data)
 #         return JsonResponse(code=400, data="wrong parameters")
-
-
-class ChangePasswordView(UpdateAPIView):
-    """
-    An endpoint for changing password.
-    """
-    serializer_class = ChangePasswordSerializer
-    model = User
-    permission_classes = [permissions.IsAuthenticated, ]
-
-    def get_object(self, queryset=None):
-        obj = self.request.user
-        return obj
-
-    def update(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        serializer = self.get_serializer(data=request.data)
-
-        if serializer.is_valid():
-            # Check old password
-            if not self.object.check_password(serializer.data.get("old_password")):
-                return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
-            # set_password also hashes the password that the user will get
-            self.object.set_password(serializer.data.get("new_password"))
-            self.object.save()
-            response = {
-                'status': 'success',
-                'code': status.HTTP_200_OK,
-                'message': 'Password updated successfully',
-                # 'data': []
-            }
-
-            return Response(response)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['GET', 'PATCH'])
-@permission_classes([permissions.IsAuthenticated])
-def profile(request):
-    try:
-        user = request.user
-        print(user)
-    except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == 'GET':
-        print(user.id)
-        # if not user:
-        #     return Response({'detail': 'unknownS error'})
-        serialized_user = UserSerializer(user).data
-        return Response({'user': serialized_user})
-    elif request.method == 'PATCH':
-        serializer = UserSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
