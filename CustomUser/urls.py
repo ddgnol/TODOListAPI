@@ -15,7 +15,12 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from django.core.handlers.wsgi import WSGIRequest
+from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.urls import path, include
+from django.views import defaults
+
 from users import views
 
 urlpatterns = [
@@ -25,3 +30,6 @@ urlpatterns = [
     # path('profile', views.UserView.as_view()),
     url(r'^profile/?$', views.profile, name='profile')
 ]
+
+handler500 = 'rest_framework.exceptions.server_error'
+handler400 = 'rest_framework.exceptions.bad_request'

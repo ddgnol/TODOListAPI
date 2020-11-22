@@ -136,9 +136,10 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PERMISSION_CLASSES': (
     #     'rest_framework.permissions.IsAuthenticated',
     # )
+    'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer',),
+    # 'EXCEPTION_HANDLER': 'CustomUser.users.utils.custom_exception_handler',
+
+
 }
-#
-# REST_FRAMEWORK = {
-#     'EXCEPTION_HANDLER': 'CustomUser.users.utils.custom_exception_handler'
-# }
+
 # APPEND_SLASH = True

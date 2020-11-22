@@ -1,22 +1,14 @@
 import jwt
-from django.http import HttpResponse
-from django.shortcuts import render
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_protect
 from rest_framework import generics, status, exceptions
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.exceptions import NotFound
 from rest_framework.generics import UpdateAPIView
 from rest_framework import permissions
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
-from django.http import Http404
 from CustomUser import settings
 from users.serializers import LoginSerializer, UserSerializer, RegisterSerializer, ChangePasswordSerializer
 from users.utils import generate_access_token
 from users.models import User
-from jsonview.decorators import json_view
 
 
 class RegisterView(generics.GenericAPIView):
@@ -40,7 +32,7 @@ class LoginAPIView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-@json_view
+
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def refresh_token_view(request):
@@ -79,6 +71,7 @@ class ChangePasswordView(UpdateAPIView):
     serializer_class = ChangePasswordSerializer
     model = User
     permission_classes = [permissions.IsAuthenticated, ]
+
     def get_object(self, queryset=None):
         obj = self.request.user
         return obj
@@ -106,7 +99,6 @@ class ChangePasswordView(UpdateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@json_view
 @api_view(['GET', 'PATCH'])
 @permission_classes([permissions.IsAuthenticated])
 def profile(request):
