@@ -1,8 +1,13 @@
+import traceback
+
 import jwt
 from rest_framework.authentication import BaseAuthentication
 from rest_framework import exceptions
 from django.conf import settings
 from django.contrib.auth import get_user_model
+import logging
+
+from CustomUser.logger import SlackHandler
 
 
 class SafeJWTAuthentication(BaseAuthentication):
@@ -26,14 +31,20 @@ class SafeJWTAuthentication(BaseAuthentication):
 
         except jwt.ExpiredSignatureError:
             raise exceptions.AuthenticationFailed('access_token expired')
+            # tb = traceback.format_exc()
+            # logger = logging.getLogger()
+            # logger.error(tb)
+
         except IndexError:
             raise exceptions.AuthenticationFailed('Token prefix missing')
 
-        user = User.objects.filter(id=payload['user_id']).first()
-        if user is None:
-            raise exceptions.AuthenticationFailed('User not found')
+        else:
+            user = User.objects.filter(id=payload['user_id']).first()
 
-        if not user.is_active:
-            raise exceptions.AuthenticationFailed('user is inactive')
+            if user is None:
+                raise exceptions.AuthenticationFailed('User not found')
 
-        return (user, None)
+            if not user.is_active:
+                raise exceptions.AuthenticationFailed('user is inactive')
+
+            return (user, None)

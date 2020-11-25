@@ -10,6 +10,7 @@ from rest_framework import permissions
 class ListTodo(generics.ListCreateAPIView):
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
+    renderer_classes = [JSONRenderer]
     def get_queryset(self):
         """
         This view should return a list of all the tasks
