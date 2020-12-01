@@ -1,5 +1,8 @@
+from django.utils import timezone
 from rest_framework import serializers
-from .models import Task
+
+from users.models import User
+from .models import Task, Member
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -10,3 +13,18 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class AddMemberSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)
+    task = serializers.IntegerField(required=True)
+
+    # def validate(self, attrs):
+    #     task_id = attrs.get('task', '')
+    #     task = Task.objects.get(pk=task_id)
+    #     username = attrs.get('username', '')
+    #     print(self.request.user)
+    #     user = User.objects.get(username=username)
+    #     member = Member(user=user, task=task, role=2)
+    #     member.save()
+    #     return {
+    #         "user": user
+    #     }

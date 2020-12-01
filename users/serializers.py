@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 import re
 
-from todo.models import Task
+from todo.models import Task, Member
 from users.models import User
 from users.utils import generate_access_token, generate_refresh_token
 
@@ -77,10 +77,12 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     task = serializers.PrimaryKeyRelatedField(many=True, queryset=Task.objects.all())
+
+
     class Meta:
         model = User
         fields = ['id', 'username', 'email',
-                  'full_name', 'phone','task']
+                  'full_name', 'phone', 'task']
         read_only_fields = ('email', 'username', 'task')
 
     def update(self, instance, validated_data):
@@ -94,5 +96,6 @@ class UserSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({'phone': 'Enter a valid phone number'})
             instance.phone = phone
         instance.save()
+        user = self.context.get('request').user
+        print(user)
         return instance
-

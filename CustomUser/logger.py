@@ -66,5 +66,7 @@ class Logger:
             trace = 'Something was wrong' if tb is None else tb
         logging.error(trace)
 
+logger = Logger()
+
 
 
