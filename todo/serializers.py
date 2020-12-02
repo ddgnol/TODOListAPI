@@ -12,10 +12,9 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = '__all__'
 
-
-class AddMemberSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    task = serializers.IntegerField(required=True)
+#
+# class AddMemberSerializer(serializers.Serializer):
+#     username = serializers.CharField(required=True)
 
     # def validate(self, attrs):
     #     task_id = attrs.get('task', '')
@@ -28,3 +27,11 @@ class AddMemberSerializer(serializers.Serializer):
     #     return {
     #         "user": user
     #     }
+
+
+# class MemberSerializer(serializers.ModelSerializer):
+#     user = serializers.ReadOnlyField(source='user.username')
+#     task = serializers.PrimaryKeyRelatedField(many)
+#     class Meta:
+#         model = Member
+#         fields = '__all__'
